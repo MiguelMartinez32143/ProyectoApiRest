@@ -29,15 +29,12 @@ SECRET_KEY = os.environ.get(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("RENDER") is None
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
-
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-if not DEBUG:
-    ALLOWED_HOSTS.append(".onrender.com")
 # Application definition
 
 INSTALLED_APPS = [
@@ -89,8 +86,10 @@ DATABASES = {
     "default": dj_database_url.config(
         default="sqlite:///db.sqlite3",
         conn_max_age=600,
+        ssl_require=True if os.environ.get("DATABASE_URL") else False,
     )
 }
+
 
 
 # Password validation
@@ -133,12 +132,28 @@ if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
     STORAGES = {
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
         },
     }
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
+
 
